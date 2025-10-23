@@ -1,3 +1,4 @@
+import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from controllers.user_controller import handle_user_routes
 from controllers.task_controller import handle_task_routes
@@ -45,10 +46,12 @@ class SimpleRequestHandler(BaseHTTPRequestHandler):
             
 
 
-def run(server_class=HTTPServer, handler_class=SimpleRequestHandler, port=8000):
+def run(server_class=HTTPServer, handler_class=SimpleRequestHandler):
+    # ⚙️ Render asigna dinámicamente el puerto a través de la variable PORT
+    port = int(os.environ.get("PORT", 8000))
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
-    print(f"Servidor corriendo en http://localhost:{port}")
+    print(f"✅ Servidor corriendo en http://0.0.0.0:{port}")
     httpd.serve_forever()
 
 if __name__=="__main__":
