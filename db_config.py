@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 # 1. CARGA DE VARIABLES DE ENTORNO (Solo para desarrollo local)
 # Render ignora este paso y usa sus propias variables inyectadas.
-load_dotenv()
+
 
 # 2. CONFIGURACIÓN DEL POOL
 # Se obtienen las credenciales de las variables de entorno de Render/dotenv
