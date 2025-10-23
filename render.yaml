@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: todo-backend
+    runtime: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python server.py"
+    plan: free
+    envVars:
+      - key: DB_HOST
+        value: localhost
+      - key: DB_USER
+        value: root
+      - key: DB_PASS
+        value: password1
+      - key: DB_NAME
+        value: todo_app
