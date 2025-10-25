@@ -11,7 +11,7 @@ dbconfig = {
     "user": os.getenv("MYSQL_USER"),
     "password": os.getenv("MYSQL_PASSWORD"), # Railway usa MYSQL_PASSWORD
     "database": os.getenv("MYSQL_DATABASE"), # Railway usa MYSQL_DATABASE
-    "port": os.getenv("MYSQL_PORT")
+    "port": os.getenv("MYSQL_PORT", "3306")
 }
 
 # Inicializamos el pool como None
@@ -28,7 +28,7 @@ try:
 
 except Error as e:
     # Si la conexión inicial falla (credenciales o falta de variables), se imprime el error.
-    print(f"Error CRÍTICO al crear el pool de conexiones. Revise sus variables de entorno: {e}")
+    print(f"Error CRÍTICO al crear el pool de conexiones: {e}")
     # El servidor fallará si esta conexión es crítica.
     pass 
 
