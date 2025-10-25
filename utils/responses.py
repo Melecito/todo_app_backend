@@ -9,3 +9,6 @@ def send_json(handler, data, status=200):
     handler.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
     handler.end_headers()
     handler.wfile.write(json.dumps(data, default=str).encode('utf-8'))
+
+
+    
