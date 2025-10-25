@@ -10,7 +10,7 @@ class SimpleRequestHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         # Manejo de CORS PRE-FLIGHT (OPTIONS)
         self.send_response(200)
-        self.send_header("Access-Control-Allow-Origin", "https://todoappacp.netlify.app")
+        self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         self.send_header("Access-Control-Max-Age", "86400")
@@ -22,7 +22,7 @@ class SimpleRequestHandler(BaseHTTPRequestHandler):
         if self.path == "/":
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
-            self.send_header("Access-Control-Allow-Origin", "https://todoappacp.netlify.app")
+            self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             # Mensaje simple de estado para verificar el deploy
             self.wfile.write(b'{"status": "API is operational"}') 
