@@ -25,7 +25,9 @@ def handle_user_routes(handler, path, method):
             content_length = int(handler.headers['Content-Length'])
             post_data = json.loads(handler.rfile.read(content_length))
             result = UserModel.create_user(post_data)
-            send_json(handler, result, 201 if result.get("success") else 400)
+            status_code = 201 if result.get("success") else 400
+            send_json(handler, result, status_code)
+
 
         elif path == "/login":
             content_length = int(handler.headers['Content-Length'])

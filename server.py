@@ -56,19 +56,12 @@ class SimpleRequestHandler(BaseHTTPRequestHandler):
 
 
 # --- FUNCIÓN DE EJECUCIÓN CORREGIDA ---
-def run(server_class=HTTPServer, handler_class=SimpleRequestHandler):
-    # ✅ RENDER: Obtiene el puerto dinámico. Es CRUCIAL que el host sea '0.0.0.0'
-    port = int(os.environ.get("PORT", 8000))
-    # '0.0.0.0' asegura que el servidor escuche en todas las interfaces de red, 
-    # lo cual es necesario en entornos de contenedores como Render.
-    server_address = ('0.0.0.0', port) 
-    
-    try:
-        httpd = server_class(server_address, handler_class)
-        print(f"✅ Servidor corriendo en http://0.0.0.0:{port}")
-        httpd.serve_forever()
-    except Exception as e:
-        print(f"❌ Error al iniciar el servidor: {e}")
+def run(server_class=HTTPServer, handler_class=SimpleRequestHandler, port=8000):
+    server_address = ('', port)
+    httpd = server_class(server_address, handler_class)
+    print(f"✅ Servidor corriendo en http://localhost:{port}")
+    httpd.serve_forever()
+
 
 if __name__=="__main__":
     run()
