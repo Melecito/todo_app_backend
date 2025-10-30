@@ -1,4 +1,7 @@
+Flask
+Flask-CORS
 mysql-connector-python
 python-dotenv
 bcrypt
 PyJWT
+
