@@ -7,7 +7,7 @@ load_dotenv()
 dbconfig = {
     'host': os.getenv('DB_HOST'), # En AWS será el RDS Endpoint
     'user': os.getenv('DB_USER'),
-    'password': os.getenv('DB_PASS'),
+    'password': os.getenv('DB_PASs'),
     'db': os.getenv('DB_NAME'),
     # ...
 }
