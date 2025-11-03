@@ -1,10 +1,8 @@
-# routes.py
-from controllers.user_controller import user_routes
-from controllers.task_controller import task_routes
+from flask import Blueprint
+from controllers.user_controller import user_bp
+from controllers.task_controller import task_bp
 
 def register_routes(app):
-    """
-    Registra todas las rutas del backend en la aplicación Flask.
-    """
-    user_routes(app)
-    task_routes(app)
+    # Prefijo común /api
+    app.register_blueprint(user_bp, url_prefix="/api")
+    app.register_blueprint(task_bp, url_prefix="/api")
