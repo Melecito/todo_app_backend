@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models.task_model import TaskModel
 
-# Creamos el blueprint de tareas
+# Crear blueprint de tareas
 task_bp = Blueprint("task_bp", __name__)
 
 # ✅ Listar todas las tareas
@@ -15,8 +15,8 @@ def get_tasks():
         return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
 
 
-# ✅ Obtener una tarea por ID
-@task_bp.route("/tasks/<task_id>", methods=["GET"])
+# ✅ Obtener tarea por ID
+@task_bp.route("/tasks/<int:task_id>", methods=["GET"])
 def get_task(task_id):
     try:
         task = TaskModel.get_task(task_id)
@@ -28,7 +28,7 @@ def get_task(task_id):
         return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
 
 
-# ✅ Crear una nueva tarea
+# ✅ Crear nueva tarea
 @task_bp.route("/tasks", methods=["POST"])
 def create_task():
     try:
@@ -41,8 +41,8 @@ def create_task():
         return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
 
 
-# ✅ Actualizar una tarea
-@task_bp.route("/tasks/<task_id>", methods=["PUT"])
+# ✅ Actualizar tarea
+@task_bp.route("/tasks/<int:task_id>", methods=["PUT"])
 def update_task(task_id):
     try:
         data = request.get_json()
@@ -54,8 +54,8 @@ def update_task(task_id):
         return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
 
 
-# ✅ Eliminar una tarea
-@task_bp.route("/tasks/<task_id>", methods=["DELETE"])
+# ✅ Eliminar tarea
+@task_bp.route("/tasks/<int:task_id>", methods=["DELETE"])
 def delete_task(task_id):
     try:
         result = TaskModel.delete_task(task_id)
