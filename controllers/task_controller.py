@@ -1,62 +1,66 @@
-import json
-from utils.responses import send_json
-from utils.auth_utils import verify_token
+from flask import Blueprint, request, jsonify
 from models.task_model import TaskModel
 
+# Creamos el blueprint de tareas
+task_bp = Blueprint("task_bp", __name__)
 
-def handle_task_routes(handler, path, method):
-    path_parts = path.strip("/").split("/")
-    auth_header = handler.headers.get("Authorization")
-
-    if not auth_header or not auth_header.startswith("Bearer "):
-        send_json(handler, {"error": "Token no proporcionado"}, 401)
-        return
-    
-    token = auth_header.split(" ")[1]
-    decoded = verify_token(token)
-
-    if "error" in decoded:
-        send_json(handler, {"error": decoded["error"]}, 401)
-        return
-    
-    user_id = decoded.get("user_id")
+# ✅ Listar todas las tareas
+@task_bp.route("/tasks", methods=["GET"])
+def get_tasks():
+    try:
+        tasks = TaskModel.list_tasks()
+        return jsonify(tasks), 200
+    except Exception as e:
+        print(f"❌ Error al listar tareas: {e}")
+        return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
 
 
-    #----------RUTAS-----------
-
-    if method == "GET":
-        tasks = TaskModel.list_tasks(user_id)
-        send_json(handler, tasks, 200)
-
-    elif method == "POST":
-        content_length = int(handler.headers["Content-Length"])
-        post_data = json.loads(handler.rfile.read(content_length))
-        result = TaskModel.create_task(user_id, post_data)
-        send_json(handler, result, 201 if result.get("success") else 400)
-
-    elif method == "PUT":
-        if len(path_parts) == 2 and path_parts[0] == "tasks":
-            task_id = int(path_parts[1])
-            content_length = int(handler.headers.get('Content-Length', 0))
-            if content_length == 0:
-                send_json(handler, {"error": "Cuerpo vacío"}, 400)
-                return
-
-            put_data = json.loads(handler.rfile.read(content_length))
-
-            result = TaskModel.update_task(user_id, task_id, put_data)
-            send_json(handler, result, 200 if result.get("success") else 400)
-        else:
-            send_json(handler, {"error": "Ruta no encontrada"}, 404)
+# ✅ Obtener una tarea por ID
+@task_bp.route("/tasks/<task_id>", methods=["GET"])
+def get_task(task_id):
+    try:
+        task = TaskModel.get_task(task_id)
+        if task:
+            return jsonify(task), 200
+        return jsonify({"error": "Tarea no encontrada"}), 404
+    except Exception as e:
+        print(f"❌ Error al obtener tarea: {e}")
+        return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
 
 
-    elif method == "DELETE":
-        if len(path_parts) == 2 and path_parts[0] == "tasks":
-            task_id = path_parts[1]
-            result = TaskModel.delete_task(user_id, task_id)
-            send_json(handler, result, 200 if result.get("success") else 400)
-        else:
-            send_json(handler, {"error": "Ruta no encontrada"}, 404)
+# ✅ Crear una nueva tarea
+@task_bp.route("/tasks", methods=["POST"])
+def create_task():
+    try:
+        data = request.get_json()
+        result = TaskModel.create_task(data)
+        status = 201 if result.get("success") else 400
+        return jsonify(result), status
+    except Exception as e:
+        print(f"❌ Error al crear tarea: {e}")
+        return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
 
-    else:
-        send_json(handler, {"error": "Método no permitido"}, 405)
+
+# ✅ Actualizar una tarea
+@task_bp.route("/tasks/<task_id>", methods=["PUT"])
+def update_task(task_id):
+    try:
+        data = request.get_json()
+        result = TaskModel.update_task(task_id, data)
+        status = 200 if result.get("success") else 400
+        return jsonify(result), status
+    except Exception as e:
+        print(f"❌ Error al actualizar tarea: {e}")
+        return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
+
+
+# ✅ Eliminar una tarea
+@task_bp.route("/tasks/<task_id>", methods=["DELETE"])
+def delete_task(task_id):
+    try:
+        result = TaskModel.delete_task(task_id)
+        status = 200 if result.get("success") else 400
+        return jsonify(result), status
+    except Exception as e:
+        print(f"❌ Error al eliminar tarea: {e}")
+        return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500

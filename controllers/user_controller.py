@@ -1,65 +1,88 @@
-import json
+from flask import Blueprint, request, jsonify
 from models.user_model import UserModel
-from utils.responses import send_json
 from utils.auth_utils import generate_token
 
+# Creamos el blueprint de usuarios
+user_bp = Blueprint("user_bp", __name__)
 
-def handle_user_routes(handler, path, method):
-    path_parts = path.strip("/").split("/")
-
-    if method == "GET":
-        if path == "/":
-            users = UserModel.list_users()
-            send_json(handler, users, 200)
-        elif len(path_parts) == 2 and path_parts[0] == "users":
-            user = UserModel.get_user(path_parts[1])
-            if user:
-                send_json(handler, user, 200)
-            else:
-                send_json(handler, {"error": "Usuario no encontrado"}, 404)
-        else:
-            send_json(handler, {"error": "Ruta no encontrada"}, 404) 
-
-    elif method == "POST":
-        if path == "/users":
-            content_length = int(handler.headers['Content-Length'])
-            post_data = json.loads(handler.rfile.read(content_length))
-            result = UserModel.create_user(post_data)
-            status_code = 201 if result.get("success") else 400
-            send_json(handler, result, status_code)
+# ✅ Obtener todos los usuarios
+@user_bp.route("/users", methods=["GET"])
+def get_users():
+    try:
+        users = UserModel.list_users()
+        return jsonify(users), 200
+    except Exception as e:
+        print(f"❌ Error al listar usuarios: {e}")
+        return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
 
 
-        elif path == "/login":
-            content_length = int(handler.headers['Content-Length'])
-            post_data = json.loads(handler.rfile.read(content_length)) 
-            email = post_data.get("email")
-            password = post_data.get("password")
+# ✅ Obtener un usuario por ID
+@user_bp.route("/users/<user_id>", methods=["GET"])
+def get_user(user_id):
+    try:
+        user = UserModel.get_user(user_id)
+        if user:
+            return jsonify(user), 200
+        return jsonify({"error": "Usuario no encontrado"}), 404
+    except Exception as e:
+        print(f"❌ Error al obtener usuario: {e}")
+        return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
 
-            auth_result = UserModel.authenticate(email, password)
-            if "error" in auth_result:
-                send_json(handler, auth_result, 401)
-            else:
-                user_id = auth_result["user"]["id"]
-                token = generate_token(user_id)
-                send_json(handler, {"success": True, "token": token}, 200)
 
-        else:
-            send_json(handler, {"error": "Ruta no encontrada"}, 404)
+# ✅ Crear un nuevo usuario
+@user_bp.route("/users", methods=["POST"])
+def create_user():
+    try:
+        data = request.get_json()
+        result = UserModel.create_user(data)
+        status = 201 if result.get("success") else 400
+        return jsonify(result), status
+    except Exception as e:
+        print(f"❌ Error al crear usuario: {e}")
+        return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
 
-    elif method == "PUT":
-        if len(path_parts) == 2 and path_parts[0] == "users":
-            user_id = path_parts[1]
-            content_length = int(handler.headers['Content-Length'])
-            put_data = json.loads(handler.rfile.read(content_length))
 
-            result = UserModel.update_user(user_id, put_data)
-            send_json(handler, result, 200 if result.get("success") else 400)
-        else:
-            send_json(handler, {"error": "Ruta no encontrada"}, 404)
+# ✅ Actualizar un usuario existente
+@user_bp.route("/users/<user_id>", methods=["PUT"])
+def update_user(user_id):
+    try:
+        data = request.get_json()
+        result = UserModel.update_user(user_id, data)
+        status = 200 if result.get("success") else 400
+        return jsonify(result), status
+    except Exception as e:
+        print(f"❌ Error al actualizar usuario: {e}")
+        return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
 
-    elif method == "DELETE":
-        if len(path_parts) == 2 and path_parts[0] == "users":
-            result = UserModel.delete_user(path_parts[1])
-            send_json(handler, result, 200 if result.get("success") else 400)
-        else:
-            send_json(handler, {"error": "Ruta no encontrada"}, 404)
+
+# ✅ Eliminar un usuario
+@user_bp.route("/users/<user_id>", methods=["DELETE"])
+def delete_user(user_id):
+    try:
+        result = UserModel.delete_user(user_id)
+        status = 200 if result.get("success") else 400
+        return jsonify(result), status
+    except Exception as e:
+        print(f"❌ Error al eliminar usuario: {e}")
+        return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
+
+
+# ✅ Login de usuario
+@user_bp.route("/login", methods=["POST"])
+def login_user():
+    try:
+        data = request.get_json()
+        email = data.get("email")
+        password = data.get("password")
+
+        auth_result = UserModel.authenticate(email, password)
+        if "error" in auth_result:
+            return jsonify(auth_result), 401
+
+        user_id = auth_result["user"]["id"]
+        token = generate_token(user_id)
+        return jsonify({"success": True, "token": token}), 200
+
+    except Exception as e:
+        print(f"❌ Error en login: {e}")
+        return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
