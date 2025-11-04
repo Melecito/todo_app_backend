@@ -7,7 +7,8 @@ from db_config import connection_pool
 app = Flask(__name__)
 
 # Configurar CORS
-CORS(app, resources={r"/api/*": {"origins": ["https://todoappacp.netlify.app", "http://localhost:4200"]}})
+CORS(app, resources={r"/api/*": {"origins": ["https://todoappacp.netlify.app", "http://localhost:4200"]}}, supports_credentials=True)
+
 
 # Registrar rutas desde routes.py
 register_routes(app)
