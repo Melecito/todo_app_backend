@@ -20,21 +20,28 @@ class TaskModel:
     def create_task(user_id, data):
         try:
             title = data.get("title")
-            description =data.get("description", "")
+            description = data.get("description", "")
 
             if not title:
-                return {"error": "El titulo es obligatorio"}
-            
+                return {"error": "El título es obligatorio"}
+
+            print(f"🟡 Creando tarea para user_id={user_id}, título='{title}'")
+
             with get_connection() as conn:
+                print("🟢 Conexión a la base de datos exitosa")
                 with conn.cursor() as cursor:
                     cursor.execute(
                         "INSERT INTO tasks (user_id, title, description) VALUES (%s, %s, %s)",
                         (user_id, title, description)
                     )
                     conn.commit()
+                    print("🟢 Tarea insertada correctamente")
                     return {"success": True, "id": cursor.lastrowid}
+
         except Exception as e:
+            print("❌ Error en create_task:", e)
             return {"error": str(e)}
+
         
     @staticmethod
     def update_task(user_id, task_id, data):
