@@ -4,4 +4,6 @@ mysql-connector-python
 python-dotenv
 bcrypt
 PyJWT
+flask-jwt-extended
+
 
