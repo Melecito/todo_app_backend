@@ -95,3 +95,16 @@ class TaskModel:
                     
         except Exception as e:
             return {"error": str(e)}
+        
+    @staticmethod
+    def get_task(user_id, task_id):
+        try:
+            with get_connection() as conn:
+                with conn.cursor(dictionary=True) as cursor:
+                    cursor.execute(
+                        "SELECT id, title, description, completed, created_at FROM tasks WHERE id = %s AND user_id = %s",
+                        (task_id, user_id)
+                    )
+                    return cursor.fetchone()
+        except Exception as e:
+            return {"error": str(e)}
