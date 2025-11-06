@@ -14,7 +14,7 @@ CORS(app, resources={r"/api/*": {"origins": [
 ]}}, supports_credentials=True)
 
 # 🔐 Configuración de JWT
-app.config["JWT_SECRET_KEY"] = "super-secret-key"  # cambia esto por una clave segura
+app.config["JWT_SECRET_KEY"] = "clave_super_secreta_123"  # cambia esto por una clave segura
 app.config["JWT_TOKEN_LOCATION"] = ["headers"]  # <- esta línea evita el KeyError
 app.config["JWT_HEADER_NAME"] = "Authorization"
 app.config["JWT_HEADER_TYPE"] = "Bearer"
