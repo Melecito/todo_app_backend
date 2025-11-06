@@ -9,10 +9,15 @@ app = Flask(__name__)
 
 # Configurar CORS para Netlify y localhost
 # Configurar CORS
+# ✅ Configurar CORS correctamente
 CORS(app, resources={r"/api/*": {"origins": [
     "https://todoappacp.netlify.app",
     "http://localhost:4200"
-]}}, supports_credentials=True, allow_headers=["Content-Type", "Authorization"])
+]}}, 
+supports_credentials=True,
+allow_headers=["Content-Type", "Authorization"],
+expose_headers=["Authorization"])  # 👈 ESTA LÍNEA ES CLAVE
+
 
 
 # 🔐 Configuración de JWT
