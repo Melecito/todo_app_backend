@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
 from routes import register_routes
 from db_config import connection_pool
 
@@ -11,6 +12,15 @@ CORS(app, resources={r"/api/*": {"origins": [
     "https://todoappacp.netlify.app",
     "http://localhost:4200"
 ]}}, supports_credentials=True)
+
+# 🔐 Configuración de JWT
+app.config["JWT_SECRET_KEY"] = "super-secret-key"  # cambia esto por una clave segura
+app.config["JWT_TOKEN_LOCATION"] = ["headers"]  # <- esta línea evita el KeyError
+app.config["JWT_HEADER_NAME"] = "Authorization"
+app.config["JWT_HEADER_TYPE"] = "Bearer"
+
+# Inicializar JWT
+jwt = JWTManager(app)
 
 # Registrar rutas desde routes.py (ya incluye /api)
 register_routes(app)
