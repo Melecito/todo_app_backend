@@ -1,73 +1,63 @@
 import os
-import mysql.connector
 from mysql.connector import pooling, Error
 from dotenv import load_dotenv
 
 load_dotenv()
+
 dbconfig = {
-    'host': os.getenv('DB_HOST'), # En AWS será el RDS Endpoint
-    'user': os.getenv('DB_USER'),
-    'password': os.getenv('DB_PASS'),
-    'db': os.getenv('DB_NAME'),
-    # ...
+    "host": os.getenv("DB_HOST", "localhost"),
+    "user": os.getenv("DB_USER", "root"),
+    "password": os.getenv("DB_PASS", ""),
+    "database": os.getenv("DB_NAME"),
+    "port": 3306
 }
 
-
-# Inicializamos el pool como None
 connection_pool = None
 
-try:
-    # CREACIÓN DEL POOL DE CONEXIONES
-    connection_pool = pooling.MySQLConnectionPool(
-        pool_name="mypool",
-        pool_size=10,
-        **dbconfig
-        
-    )
-    print("✅ Pool de conexiones creado correctamente. ¡Servidor listo!")
 
-except Error as e:
-    print(f"❌ Error CRÍTICO al crear el pool de conexiones: {e}")
-    connection_pool = None
+def get_pool():
+    global connection_pool
 
-
-# 4. FUNCIÓN PARA OBTENER CONEXIÓN
-def get_connection():
-    """
-    Intenta obtener una conexión del pool. 
-    """
     if connection_pool is None:
-        raise Error("El pool de conexiones no esta disponible. (Revisar credenciales o logs de Railway)")
+        try:
+            connection_pool = pooling.MySQLConnectionPool(
+                pool_name="mypool",
+                pool_size=5,
+                **dbconfig
+            )
+            print("✅ Pool creado correctamente.")
+        except Error as e:
+            print(f"❌ Error creando pool: {e}")
+            raise
 
+    return connection_pool
+
+
+def get_connection():
     try:
-        connection = connection_pool.get_connection()
-        return connection
+        pool = get_pool()
+        return pool.get_connection()
     except Error as e:
-        raise Error(f"Error al obtener conexión del pool: {e}")
+        raise Error(f"Error obteniendo conexión: {e}")
 
 
-# 5. FUNCIÓN DE USO EN LA APLICACIÓN (Se mantiene el código original)
 def query_example():
-    connection = None 
+    connection = None
     try:
         connection = get_connection()
-        
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM users LIMIT 1")
-            result = cursor.fetchone()
-            return result
-            
+            return cursor.fetchone()
     except Error as e:
-        print(f"Error en la consulta: {e}")
-        return {"error": "Conexión de base de datos fallida o consulta errónea"}
-        
+        print(f"Error en consulta: {e}")
+        return {"error": "Error en base de datos"}
     finally:
-        # Devolver la conexión al pool
         if connection and connection.is_connected():
             connection.close()
 
-if __name__ == '__main__':
-    if connection_pool:
-        print(f"Resultado de consulta de prueba: {query_example()}")
-    else:
-        print("El pool no pudo ser inicializado. La aplicación fallará.")
+
+if __name__ == "__main__":
+    try:
+        print(query_example())
+    except Exception:
+        print("No se pudo conectar a la base de datos.")
